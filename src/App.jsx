@@ -12,6 +12,7 @@ function App() {
     // Value of userDetails represents whether the user
     // is logged in or not.
     const [userDetails, setUserDetails] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     const isUserLoggedIn = async () => {
         try {
@@ -21,12 +22,22 @@ function App() {
             setUserDetails(response.data.user);
         } catch (error) {
             console.log(error);
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         isUserLoggedIn();
     }, []);
+
+    if (loading) {
+        return (
+            <div className="container text-center">
+                <h3>Loading...</h3>
+            </div>
+        );
+    }
 
     return (
         <Routes>
