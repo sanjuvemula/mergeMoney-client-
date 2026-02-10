@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import axios from "axios";
 import { serverEndpoint } from "../config/appConfig";
+import ExpenseModal from "../components/ExpanseModal";
 
 function GroupExpenses() {
     // 1. Get the groupId from the URL
@@ -100,6 +101,12 @@ function GroupExpenses() {
                     </ul>
                 )}
             </div>
+            <ExpenseModal
+                show={show}
+                onClose={() => setShow(false)}
+                groupId={groupId}
+                onSuccess={fetchExpenses}
+            />
         </div>
     );
 }
