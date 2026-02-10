@@ -1,9 +1,37 @@
+import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import axios from "axios";
+import { serverEndpoint } from "../config/appConfig";
 
 function GroupExpenses() {
     // 1. Get the groupId from the URL
     const { groupId } = useParams();
+    const [expenses, setExpenses] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [show, setShow] = useState(false);
 
+    const fetchExpenses = async () => {
+        try {
+            const response = await axios.get(
+                `${serverEndpoint}/expenses/${groupId}`,
+                { withCredentials: true }
+            );
+
+            setExpenses(response.data);
+        } catch (err) {
+            setError("Failed to load expenses");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchExpenses();
+    }, [groupId]);
+
+    if (loading) return <p>Loading expenses...</p>;
+    if (error) return <p>{error}</p>;
     return (
         <div className="container py-5">
             <nav aria-label="breadcrumb">
@@ -26,23 +54,51 @@ function GroupExpenses() {
                 </p>
 
                 <hr className="my-5" />
-
-                <div className="alert alert-info d-inline-block px-5">
-                    <h5>🛠️ Student Assignment</h5>
-                    <p className="mb-0">Implement the following here:</p>
-                    <ul className="text-start mt-3">
-                        <li>
-                            Fetch and display group details (Name, Members).
-                        </li>
-                        <li>
-                            Show a list of past transactions for this group.
-                        </li>
-                        <li>
-                            Add a form to create a new expense with title,
-                            amount, and split logic.
-                        </li>
-                    </ul>
+                <div className="d-flex justify-content-between align-items-center mb-4">
+                    <h4 className="fw-semibold mb-0">Expenses</h4>
+                    <button
+                        className="btn btn-primary"
+                        onClick={() => setShow(true)}
+                    >
+                        Add Expense
+                    </button>
                 </div>
+                {expenses.length === 0 ? (
+                    // <p>No expenses added yet</p>
+                    <div className="text-center py-5 bg-light rounded-5 border border-dashed border-primary border-opacity-25 shadow-inner">
+                        <div className="bg-white rounded-circle d-inline-flex p-4 mb-4 shadow-sm">
+                            <i
+                                className="bi bi-people text-primary"
+                                style={{ fontSize: "3rem" }}
+                            ></i>
+                        </div>
+                        <h4 className="fw-bold">No Expenses Found</h4>
+                        <p
+                            className="text-muted mx-auto mb-4"
+                            style={{ maxWidth: "400px" }}
+                        >
+                            You haven't added any expenses yet in this group.
+                        </p>
+                        <button
+                            className="btn btn-outline-primary rounded-pill px-4"
+                            onClick={() => setShow(true)}
+                        >
+                            Get Started
+                        </button>
+                    </div>
+                ) : (
+                    <ul className="list-unstyled">
+                        {expenses.map((expense) => (
+                            <li key={expense._id} className="mb-3">
+                                <strong>{expense.title}</strong> — ₹{expense.totalAmount}
+                                <br />
+                                <span className="text-muted">
+                                    Paid by: {expense.paidBy}
+                                </span>
+                            </li>
+                        ))}
+                    </ul>
+                )}
             </div>
         </div>
     );
