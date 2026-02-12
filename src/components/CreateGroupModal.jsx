@@ -66,6 +66,7 @@ function ExpenseSplitSection({ groupId, onSplitChange }) {
     };
 
     useEffect(() => {
+        if (!groupId) return;   
         fetchGroupMembers();
     }, [groupId]);
 

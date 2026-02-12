@@ -12,7 +12,6 @@ function ExpenseSplitSection({ groupId, onSplitChange }) {
                 `${serverEndpoint}/groups/${groupId}`,
                 { withCredentials: true }
             );
-
             const groupMembers = response.data.membersEmail;
             setMembers(groupMembers);
 
@@ -82,6 +81,7 @@ function ExpenseSplitSection({ groupId, onSplitChange }) {
     };
 
     useEffect(() => {
+        if (!groupId) return; 
         fetchGroupMembers();
     }, [groupId]);
 

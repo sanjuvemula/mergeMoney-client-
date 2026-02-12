@@ -14,6 +14,7 @@ function GroupExpenses() {
     const [error, setError] = useState(null);
     const [show, setShow] = useState(false);
     const [summary, setSummary] = useState({});
+    const [group, setGroup] = useState(null);
 
     const fetchExpenses = async () => {
         try {
@@ -48,22 +49,36 @@ function GroupExpenses() {
                 {},
                 { withCredentials: true }
             );
+            fetchGroup();
             fetchSummary();
+
         } catch (error) {
             console.error("Error settling group:", error);
+        }
+    };
+
+    const fetchGroup = async () => {
+        try {
+            const response = await axios.get(
+                `${serverEndpoint}/groups/${groupId}`,
+                { withCredentials: true }
+            );
+            setGroup(response.data);
+        } catch (error) {
+            console.error("Error fetching group:", error);
         }
     };
 
     useEffect(() => {
         fetchExpenses();
         fetchSummary();
+        fetchGroup();
     }, [groupId]);
 
     if (loading) return <p>Loading expenses...</p>;
     if (error) return <p>{error}</p>;
 
-    const isSettled =
-        Object.keys(summary).length === 0 && expenses.length > 0;
+    const isSettled = group?.paymentStatus?.isPaid;
 
     return (
         <div className="container py-5">
@@ -98,8 +113,11 @@ function GroupExpenses() {
                     <h4 className="fw-semibold mb-0">Expenses</h4>
                     <button
                         className="btn btn-primary"
-                        onClick={() => setShow(true)}
+                        onClick={() => 
+                            setShow(true) 
+                        }
                         disabled={isSettled}
+
                     >
                         Add Expense
                     </button>
