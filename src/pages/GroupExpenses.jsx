@@ -48,8 +48,6 @@ function GroupExpenses() {
                 {},
                 { withCredentials: true }
             );
-
-            // Refresh summary after settlement
             fetchSummary();
         } catch (error) {
             console.error("Error settling group:", error);
@@ -142,10 +140,7 @@ function GroupExpenses() {
                     </ul>
                 )}
 
-                {/* Summary Section */}
                 <ExpenseSummary summary={summary} />
-
-                {/* Settle Section */}
                 <div className="text-end mt-4">
                     {isSettled ? (
                         <span className="badge bg-success px-3 py-2">

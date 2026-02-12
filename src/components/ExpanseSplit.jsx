@@ -12,33 +12,28 @@ function ExpenseSplitSection({ groupId, onSplitChange }) {
                 `${serverEndpoint}/groups/${groupId}`,
                 { withCredentials: true }
             );
+
             const groupMembers = response.data.membersEmail;
             setMembers(groupMembers);
+
             const initialData = {};
+            const splitArray = [];
             groupMembers.forEach((email) => {
                 initialData[email] = {
                     included: true,
                     amount: 0
                 };
+                splitArray.push({
+                    email: email,
+                    amount: 0
+                });
             });
             setSelectedMembers(initialData);
-            updateSplit(initialData);
+            onSplitChange(splitArray);
+
         } catch (error) {
             console.log(error);
         }
-    };
-
-    const updateSplit = (data) => {
-        const splitArray = [];
-        for (const email in data) {
-            if (data[email].included) {
-                splitArray.push({
-                    email: email,
-                    amount: data[email].amount
-                });
-            }
-        }
-        onSplitChange(splitArray);
     };
 
     const handleToggle = (email, checked) => {
@@ -50,7 +45,17 @@ function ExpenseSplitSection({ groupId, onSplitChange }) {
             }
         };
         setSelectedMembers(updated);
-        updateSplit(updated);
+
+        const splitArray = [];
+        for (const key in updated) {
+            if (updated[key].included) {
+                splitArray.push({
+                    email: key,
+                    amount: updated[key].amount
+                });
+            }
+        }
+        onSplitChange(splitArray);
     };
 
     const handleAmountChange = (email, value) => {
@@ -62,7 +67,18 @@ function ExpenseSplitSection({ groupId, onSplitChange }) {
             }
         };
         setSelectedMembers(updated);
-        updateSplit(updated);
+
+        const splitArray = [];
+        for (const key in updated) {
+            if (updated[key].included) {
+                splitArray.push({
+                    email: key,
+                    amount: updated[key].amount
+                });
+            }
+        }
+
+        onSplitChange(splitArray);
     };
 
     useEffect(() => {

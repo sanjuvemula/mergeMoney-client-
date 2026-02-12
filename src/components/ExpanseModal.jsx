@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { serverEndpoint } from "../config/appConfig";
 import { useSelector } from "react-redux";
+import ExpenseSplitSection from "./ExpanseSplit";
 
 function ExpenseModal({ show, onClose, groupId, onSuccess }) {
     const user = useSelector((state) => state.userDetails);
@@ -11,6 +12,8 @@ function ExpenseModal({ show, onClose, groupId, onSuccess }) {
     });
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
+    const [split, setSplit] = useState([]);
+
 
     const validate = () => {
         let isValid = true;
@@ -21,14 +24,30 @@ function ExpenseModal({ show, onClose, groupId, onSuccess }) {
             isValid = false;
         }
 
-        if (formData.amount === "") {
-            newErrors.amount = "Amount is required";
+        if (!formData.amount || Number(formData.amount) <= 0) {
+            newErrors.amount = "Amount must be greater than 0";
             isValid = false;
         }
 
+        let totalSplit = 0;
+
+        if (split.length === 0) {
+            newErrors.message = "At least one member must be included";
+            isValid = false;
+        } else {
+            for (let i = 0; i < split.length; i++) {
+                totalSplit += split[i].amount;
+            }
+
+            if (totalSplit !== Number(formData.amount)) {
+                newErrors.message = "Split total must match expense amount";
+                isValid = false;
+            }
+        }
         setErrors(newErrors);
         return isValid;
     };
+
 
     const onChange = (e) => {
         setFormData({
@@ -45,7 +64,6 @@ function ExpenseModal({ show, onClose, groupId, onSuccess }) {
         e.preventDefault();
 
         if (!validate()) return;
-
         setLoading(true);
         try {
             await axios.post(
@@ -55,19 +73,15 @@ function ExpenseModal({ show, onClose, groupId, onSuccess }) {
                     title: formData.title,
                     totalAmount: Number(formData.amount),
                     paidBy: user.email,
-                    split: [
-                        {
-                            email: user.email,
-                            amount: Number(formData.amount)
-                        }
-                    ]
+                    split: split
                 },
                 { withCredentials: true }
             );
 
             onSuccess();
             setFormData({ title: "", amount: "" });
-            onClose();        
+            setSplit([]);
+            onClose();
         } catch (error) {
             console.error(error);
             setErrors({
@@ -154,7 +168,12 @@ function ExpenseModal({ show, onClose, groupId, onSuccess }) {
                                     </div>
                                 )}
                             </div>
+                            <ExpenseSplitSection
+                                groupId={groupId}
+                                onSplitChange={setSplit}
+                            />
                         </div>
+
 
                         <div className="modal-footer border-0 pt-0">
                             <button
