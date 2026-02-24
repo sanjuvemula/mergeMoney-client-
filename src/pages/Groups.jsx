@@ -75,7 +75,10 @@ function Groups() {
                 <div className="col-md-4 text-center text-md-end">
                     <button
                         className="btn btn-primary rounded-pill px-4 py-2 fw-bold shadow-sm"
-                        onClick={() => setShow(true)}
+                        onClick={() => {
+                            console.log("Create Group Clicked");
+                            setShow(true);
+                        }}
                     >
                         <i className="bi bi-plus-lg me-2"></i>
                         New Group
